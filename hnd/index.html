@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>山川穂高ここで一発</title>
+    <link rel="stylesheet" href="./API.css">
+</head>
+<body>
+
+  <div id="Page1">
+    <h1>犬に名前を付けてあげてください</h1>
+
+    <!--命名横並び-->
+    <div style="display: flex; flex-direction: row; gap: 20px;">
+      <input type="text" placeholder="なまえを入力" class="input" id="DogName">
+      <button onclick="putName()" class="button">君に決めた！</button>
+    </div>
+
+    <button onclick="getDog()" class="button button_changeDog" style="background-color: rgb(180, 223, 250);">
+      違う犬を見てみる</button>
+
+    <div id="Dog_box" class="box"></div>
+
+    
+  </div>
+
+  <div id="Page2" class="hide">
+    <div class="line1">命名</div>
+    <div class="line2" id="Result_Name">あ</div>
+    <div class="line3" id="Result_pic">い</div>
+  </div>
+
+<script src="./API.js">
+</script>
+</body>
+
+
+</html>
