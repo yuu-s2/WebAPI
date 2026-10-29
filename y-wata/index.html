@@ -1,434 +1,493 @@
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>無料為替レートサイト</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>為替を調べてください</title>
 
-  <!-- グラフを表示するライブラリ -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- グラフ表示用ライブラリ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #82f014;
-      color: #82f014;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+<style>
+body {
+    font-family: sans-serif;
+    background-color: #f2f5fa;
+    margin: 0;
+    padding: 20px;
+    color: #263238;
+}
 
-    h1 {
-      text-align: center;
-      color: #6600ff;
-    }
+h1 {
+    text-align: center;
+    color: #207e17;
+}
 
-    section {
-      background: rgb(122, 0, 255);
-      padding: 20px;
-      margin: 20px 0;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px #0001;
-    }
+h2 {
+    color: #174a7e;
+    border-bottom: 2px solid #d6e3f0;
+    padding-bottom: 8px;
+    text-align: center;
+}
 
-    button, input, select {
-      padding: 9px;
-      margin: 5px;
-      font-size: 15px;
-    }
+section {
+    background-color: rgb(255, 255, 255);
+    max-width: 850px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px #00000012;
+}
 
-    button {
-      background: #ff6600;
-      color: rgb(0, 00, 255);
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+select, input, button {
+    padding: 9px;
+    margin: 5px 3px;
+    font-size: 15px;
+    max-width: 100%;
+}
 
-    button:hover {
-      background: #163d78;
-    }
+button {
+    background-color: #0d9704;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
-    .rate {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-    }
+button:hover {
+    background-color: #0d4778;
+}
 
-    #status, #chartStatus {
-      color: #555;
-    }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
 
-    .chart-area {
-      position: relative;
-      height: 350px;
-    }
-  </style>
+th, td {
+    border: 1px solid #d5dce5;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #5da9f5;
+}
+
+.result {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 15px;
+    overflow-wrap: anywhere;
+}
+
+.status {
+    color: #555;
+    font-size: 14px;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    min-height: 250px;
+}
+</style>
 </head>
 
 <body>
-  <h1>通貨を調べておいてください</h1>
 
-  <p id="status">為替データを取得しています...</p>
+<h1>世界の為替レート</h1>
 
-  <!-- 機能1：為替レート表示 -->
-  <section>
-    <h2>① 為替レート一覧</h2>
+<!-- 機能1：為替レート一覧 -->
+<section>
+    <h2>為替レート一覧</h2>
 
-    <label>
-      基準通貨：
-      <select id="rateBase">
-        <option value="USD">米ドル（USD）</option>
-        <option value="JPY">日本円（JPY）</option>
-        <option value="EUR">ユーロ（EUR）</option>
-      </select>
-    </label>
+    <p>基準を選んでください。</p>
 
-    <button onclick="loadRates()">レートを取得</button>
+    <select id="rateBase"></select>
+    <button onclick="loadRates()">表示！</button>
 
-    <div id="rates">ここに為替レートを表示します。</div>
-  </section>
+    <p id="rateStatus" class="status"></p>
 
-  <!-- 機能2：通貨換算 -->
-  <section>
-    <h2>② 通貨換算</h2>
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>通貨</th>
+                    <th>為替レート</th>
+                </tr>
+            </thead>
+            <tbody id="rateTable"></tbody>
+        </table>
+    </div>
 
-    <p>換算したい金額を入力しておいてください。</p>
+    <p class="status">
+        ※ 1単位の基準通貨が、相手通貨でいくらになるかを表示します。
+    </p>
+</section>
 
-    <input
-      id="amount"
-      type="number"
-      value="100"
-      min="0"
-      step="any"
-    >
+<!-- 機能2：通貨換算 -->
+<section>
+    <h2>通貨換算</h2>
 
-    <select id="fromCurrency">
-      <option value="USD">米ドル（USD）</option>
-      <option value="JPY">日本円（JPY）</option>
-      <option value="EUR">ユーロ（EUR）</option>
-      <option value="GBP">英ポンド（GBP）</option>
-    </select>
+    <p>換算したい金額と通貨を選択してください。</p>
 
+    <input type="number" id="amount" value="1000" min="0"
+           step="any" placeholder="金額">
+
+    <br>
+
+    <select id="fromCurrency"></select>
     <span>から</span>
+    <select id="toCurrency"></select>
 
-    <select id="toCurrency">
-      <option value="JPY">日本円（JPY）</option>
-      <option value="USD">米ドル（USD）</option>
-      <option value="EUR">ユーロ（EUR）</option>
-      <option value="GBP">英ポンド（GBP）</option>
-    </select>
+    <br>
 
     <button onclick="convertCurrency()">換算する</button>
 
-    <p id="conversionResult">
-      ここに換算結果が表示されます。
-    </p>
-  </section>
+    <p id="conversionResult" class="result"></p>
+    <p id="conversionStatus" class="status"></p>
+</section>
 
-  <!-- 機能3：過去の為替レートのグラフ -->
-  <section>
-    <h2>③ 過去の為替レート</h2>
+<!-- 機能3：過去の為替レートグラフ -->
+<section>
+    <h2>為替レートの変化のグラフ</h2>
 
-    <p>基準通貨と比較する通貨を選択しておいてください。</p>
+    <p>通貨を選んでください。</p>
 
-    <label>
-      基準通貨：
-      <select id="chartBase">
-        <option value="USD">米ドル（USD）</option>
-        <option value="EUR">ユーロ（EUR）</option>
-        <option value="GBP">英ポンド（GBP）</option>
-      </select>
-    </label>
+    <label for="chartBase">基準通貨：</label>
+    <select id="chartBase"></select>
 
-    <label>
-      比較する通貨：
-      <select id="chartQuote">
-        <option value="JPY">日本円（JPY）</option>
-        <option value="EUR">ユーロ（EUR）</option>
-        <option value="GBP">英ポンド（GBP）</option>
-      </select>
-    </label>
+    <br>
 
-    <p>
-      表示期間：
-      <select id="period">
-        <option value="30">過去約30日間</option>
-        <option value="90">過去約90日間</option>
-      </select>
+    <label for="chartQuote">相手通貨：</label>
+    <select id="chartQuote"></select>
 
-      <button onclick="loadChart()">グラフを表示</button>
-    </p>
+    <br>
 
-    <p id="chartStatus">
-      期間を選んでグラフを表示してください。
-    </p>
+    <label for="period">期間：</label>
+<select id="period">
+    <option value="30">過去30日</option>
+    <option value="90">過去90日</option>
+    <option value="180">過去180日</option>
+    <option value="365">過去1年</option>
+    <option value="1825">過去5年</option>
+    <option value="3650">過去10年</option>
+    <option value="10950">過去30年</option>
+</select>
 
-    <div class="chart-area">
-      <canvas id="rateChart"></canvas>
+    <button onclick="loadChart()">グラフを表示</button>
+
+    <p id="chartStatus" class="status"></p>
+
+    <div class="chart-container">
+        <canvas id="rateChart"></canvas>
     </div>
-  </section>
+</section>
 
-  <p>為替データ：Frankfurter API</p>
-  <p>※日次の参考レートです。実際の両替レートとは異なる場合があります。</p>
+<p style="text-align:center;" class="status">
+    為替データ：Frankfurter API
+</p>
 
-  <script>
-    // Frankfurter APIのURL
-    const API = "https://api.frankfurter.dev/v2";
+<script>
+const API = "https://api.frankfurter.dev/v2";
 
-    // APIからデータを取得する共通関数
-    async function fetchJSON(url) {
-      const response = await fetch(url);
+// 対応する15種類の通貨
+const currencies = [
+    { code: "JPY", name: "日本円" },
+    { code: "USD", name: "米ドル" },
+    { code: "EUR", name: "ユーロ" },
+    { code: "GBP", name: "イギリスポンド" },
+    { code: "KRW", name: "韓国ウォン" },
+    { code: "CNY", name: "中国元" },
+    { code: "CAD", name: "カナダドル" },
+    { code: "AUD", name: "オーストラリアドル" },
+    { code: "CHF", name: "スイスフラン" },
+    { code: "NZD", name: "ニュージーランドドル" },
+    { code: "SGD", name: "シンガポールドル" },
+    { code: "HKD", name: "香港ドル" },
+    { code: "THB", name: "タイバーツ" },
+    { code: "INR", name: "インドルピー" },
+    { code: "MXN", name: "メキシコペソ" },
+    { code: "VND", name: "ベトナムドン" },
+];
 
-      if (!response.ok) {
-        throw new Error("データの取得に失敗しました。");
-      }
+// 通貨選択欄を作る
+function setupCurrencySelects() {
+    const selectIds = [
+        "rateBase",
+        "fromCurrency",
+        "toCurrency",
+        "chartBase",
+        "chartQuote"
+    ];
 
-      return await response.json();
+    selectIds.forEach(id => {
+        const select = document.getElementById(id);
+
+        currencies.forEach(currency => {
+            const option = document.createElement("option");
+            option.value = currency.code;
+            option.textContent =
+                currency.name + " (" + currency.code + ")";
+            select.appendChild(option);
+        });
+    });
+
+    // 初期設定
+    document.getElementById("rateBase").value = "JPY";
+    document.getElementById("fromCurrency").value = "JPY";
+    document.getElementById("toCurrency").value = "USD";
+    document.getElementById("chartBase").value = "USD";
+    document.getElementById("chartQuote").value = "JPY";
+}
+
+// APIからデータを取得する共通処理
+async function fetchJSON(url) {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error("データを取得できませんでした　すまない　許さん");
     }
 
-    // 機能1：為替レートを表示する
-    async function loadRates() {
-      const base =
-        document.getElementById("rateBase").value;
+    return await response.json();
+}
 
-      const area =
-        document.getElementById("rates");
+// 機能1：為替レート一覧を表示する
+async function loadRates() {
+    const base = document.getElementById("rateBase").value;
+    const table = document.getElementById("rateTable");
+    const status = document.getElementById("rateStatus");
 
-      const status =
-        document.getElementById("status");
+    table.innerHTML = "";
+    status.textContent = "レートを取得しています...";
 
-      area.textContent = "取得中...";
-      status.textContent = "";
+    try {
+        const quotes = currencies
+            .map(currency => currency.code)
+            .filter(code => code !== base)
+            .join(",");
 
-      try {
-        // 基準通貨と同じ通貨を除外する
-        const quotes = ["JPY", "USD", "EUR", "GBP"]
-          .filter(currency => currency !== base)
-          .join(",");
-
-        // APIのURLを作成する
         const url =
-          `${API}/rates?base=${base}&quotes=${quotes}`;
+            `${API}/rates?base=${base}&quotes=${quotes}`;
 
-        // 為替レートを取得する
         const data = await fetchJSON(url);
 
-        // 古い表示を消す
-        area.replaceChildren();
+        data.sort((a, b) =>
+            a.quote.localeCompare(b.quote)
+        );
 
-        // 取得したレートを順番に表示する
         data.forEach(item => {
-          const p = document.createElement("p");
+            const row = document.createElement("tr");
 
-          p.className = "rate";
+            const currencyCell = document.createElement("td");
+            currencyCell.textContent = getCurrencyName(item.quote);
 
-          p.textContent =
-            `1 ${item.base} = ${item.rate} ${item.quote}` +
-            `（${item.date}）`;
+            const rateCell = document.createElement("td");
+            rateCell.textContent =
+                Number(item.rate).toLocaleString("ja-JP", {
+                    maximumFractionDigits: 6
+                });
 
-          area.appendChild(p);
+            row.appendChild(currencyCell);
+            row.appendChild(rateCell);
+            table.appendChild(row);
         });
 
-        status.textContent =
-          "為替レートを取得できました　いいだろう　あざす。";
+        if (data.length > 0) {
+            status.textContent =
+                "基準通貨：" + base +
+                " ／ データの日付：" + data[0].date;
+        } else {
+            status.textContent = "レートが見つかりませんでした。";
+        }
 
-      } catch (error) {
-        area.textContent = error.message;
+    } catch (error) {
         status.textContent =
-          "通信に失敗しました。";
-      }
+            "レートを取得できませんでした。時間をおいて再試行してください。";
+    }
+}
+
+// 通貨コードから通貨名を取得する
+function getCurrencyName(code) {
+    const currency = currencies.find(item => item.code === code);
+
+    if (currency) {
+        return currency.name + " (" + code + ")";
     }
 
-    // 機能2：通貨を換算する
-    async function convertCurrency() {
-      const amount =
+    return code;
+}
+
+// 機能2：通貨を換算する
+async function convertCurrency() {
+    const amount =
         Number(document.getElementById("amount").value);
 
-      const from =
+    const from =
         document.getElementById("fromCurrency").value;
 
-      const to =
+    const to =
         document.getElementById("toCurrency").value;
 
-      const result =
+    const result =
         document.getElementById("conversionResult");
 
-      // 金額が正しいか確認する
-      if (
-        document.getElementById("amount").value.trim() === "" ||
-        !Number.isFinite(amount) ||
-        amount < 0
-      ) {
-        result.textContent =
-          "0以上の金額を入力してください。";
+    const status =
+        document.getElementById("conversionStatus");
+
+    result.textContent = "";
+    status.textContent = "";
+
+    if (!Number.isFinite(amount) || amount < 0) {
+        status.textContent = "0以上の金額を入力してください。";
         return;
-      }
+    }
 
-      // 同じ通貨なら換算は不要
-      if (from === to) {
-        result.textContent =
-          `${amount} ${from} = ${amount} ${to}`;
-        return;
-      }
+    status.textContent = "換算しています...";
 
-      result.textContent = "計算中...";
-
-      try {
-        // 2つの通貨間のレートを取得する
+    try {
         const url = `${API}/rate/${from}/${to}`;
-
         const data = await fetchJSON(url);
 
-        // 金額に為替レートを掛ける
         const converted = amount * data.rate;
 
         result.textContent =
-          `${amount.toLocaleString()} ${from} = ` +
-          `${converted.toLocaleString("ja-JP", {
-            maximumFractionDigits: 2
-          })} ${to}` +
-          `（レート日：${data.date}）`;
+            amount.toLocaleString("ja-JP") + " " + from +
+            " = " +
+            converted.toLocaleString("ja-JP", {
+                maximumFractionDigits: 4
+            }) + " " + to;
 
-      } catch (error) {
-        result.textContent =
-          "換算できませんでした。通信を確認してください。";
-      }
+        status.textContent =
+            "使用したレート：" + data.rate +
+            " ／ データの日付：" + data.date;
+
+    } catch (error) {
+        status.textContent =
+            "換算できませんでした。別の通貨を選んでください。";
+    }
+}
+
+// グラフを保存しておく変数
+let rateChart = null;
+
+// 日付をYYYY-MM-DD形式にする
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+// 機能3：過去の為替レートをグラフにする
+async function loadChart() {
+    const base = document.getElementById("chartBase").value;
+    const quote = document.getElementById("chartQuote").value;
+    const period = Number(document.getElementById("period").value);
+
+    const status = document.getElementById("chartStatus");
+
+    if (base === quote) {
+        status.textContent =
+            "基準通貨と相手通貨には、異なる通貨を選んでください。";
+        return;
     }
 
-    // 機能3：過去のレートをグラフにする
-    let chart = null;
+    status.textContent = "過去のレートを取得しています...";
 
-    async function loadChart() {
-      const base =
-        document.getElementById("chartBase").value;
+    try {
+        const endDate = new Date();
+        const startDate = new Date();
 
-      const quote =
-        document.getElementById("chartQuote").value;
+        startDate.setDate(startDate.getDate() - period);
 
-      const days =
-        Number(document.getElementById("period").value);
+        const fromDate = formatDate(startDate);
+        const toDate = formatDate(endDate);
 
-      const status =
-        document.getElementById("chartStatus");
-
-      // 同じ通貨同士は比較できない
-      if (base === quote) {
-        status.textContent =
-          "異なる通貨を選択してください。";
-        return;
-      }
-
-      status.textContent =
-        "過去のデータを取得しています...";
-
-      try {
-        // 今日の日付を取得する
-        const today = new Date();
-
-        const end = today.toISOString().slice(0, 10);
-
-        // 指定した日数だけ過去の日付を求める
-        const startDate = new Date(today);
-
-        startDate.setUTCDate(
-          startDate.getUTCDate() - days
-        );
-
-        const start =
-          startDate.toISOString().slice(0, 10);
-
-        // 指定期間の為替レートを取得する
         const url =
-          `${API}/rates?base=${base}` +
-          `&quotes=${quote}` +
-          `&from=${start}&to=${end}`;
+            `${API}/rates?base=${base}` +
+            `&quotes=${quote}` +
+            `&from=${fromDate}&to=${toDate}`;
 
         const data = await fetchJSON(url);
 
-        // 比較対象の通貨だけを取り出して日付順に並べる
-        const rows = data
-          .filter(item => item.quote === quote)
-          .sort((a, b) =>
-            a.date.localeCompare(b.date)
-          );
+        const filteredData = data
+            .filter(item => item.quote === quote)
+            .sort((a, b) => a.date.localeCompare(b.date));
 
-        // データがない場合
-        if (rows.length === 0) {
-          status.textContent =
-            "指定期間のデータがありません。";
-          return;
+        if (filteredData.length === 0) {
+            status.textContent =
+                "この期間のデータが見つかりませんでした。";
+            return;
         }
 
-        // 日付とレートを配列にする
-        const labels =
-          rows.map(item => item.date);
+        const labels = filteredData.map(item => item.date);
+        const values = filteredData.map(item => item.rate);
 
-        const values =
-          rows.map(item => item.rate);
+        const ctx = document.getElementById("rateChart");
 
-        // 以前のグラフを削除する
-        if (chart !== null) {
-          chart.destroy();
+        if (rateChart) {
+            rateChart.destroy();
         }
 
-        // 折れ線グラフを作成する
-        chart = new Chart(
-          document.getElementById("rateChart"),
-          {
+        rateChart = new Chart(ctx, {
             type: "line",
 
             data: {
-              labels: labels,
+                labels: labels,
 
-              datasets: [{
-                label: `1 ${base} あたりの ${quote}`,
-                data: values,
-                borderColor: "#2056a5",
-                backgroundColor: "#2056a522",
-                fill: true,
-                tension: 0.2,
-                pointRadius: 2
-              }]
+                datasets: [{
+                    label: `${base}から${quote}への為替レート`,
+                    data: values,
+                    borderColor: "#1769aa",
+                    backgroundColor: "#1769aa22",
+                    borderWidth: 2,
+                    pointRadius: 1,
+                    fill: true,
+                    tension: 0.2
+                }]
             },
 
             options: {
-              responsive: true,
-              maintainAspectRatio: false,
+                responsive: true,
+                maintainAspectRatio: false,
 
-              scales: {
-                x: {
-                  title: {
-                    display: true,
-                    text: "日付"
-                  }
-                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "日付"
+                        }
+                    },
 
-                y: {
-                  title: {
-                    display: true,
-                    text: `レート（${quote}）`
-                  }
+                    y: {
+                        title: {
+                            display: true,
+                            text: `1 ${base} あたりの ${quote}`
+                        }
+                    }
                 }
-              }
             }
-          }
-        );
+        });
 
         status.textContent =
-          `${start} ～ ${end} のデータを表示しました。` +
-          `（データ件数：${rows.length}）`;
+            "表示期間：" + fromDate + " ～ " + toDate +
+            " ／ データ件数：" + filteredData.length;
 
-      } catch (error) {
+    } catch (error) {
         status.textContent =
-          "グラフを取得できませんでした。" +
-          "インターネット接続を確認してください。";
-      }
+            "グラフを表示できませんでした。別の通貨や期間を試してください。";
     }
+}
 
-    // ページを開いたときにレートを取得する
-    loadRates();
-  </script>
+// ページを開いたときに実行する
+setupCurrencySelects();
+loadRates();
+loadChart();
+</script>
+
 </body>
 </html>
-
