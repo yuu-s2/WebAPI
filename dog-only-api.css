@@ -1,0 +1,132 @@
+#dog-app{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#dog-app #Page1{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+    gap: 20px;
+}
+
+#dog-app .box{
+    width: min(800px, 92vw);
+    min-height: 420px;
+    height: auto;
+    padding: 16px 0;
+    background-color: lightyellow;
+    border-radius: 13px;
+    box-shadow: 0 0 5px lightgray;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#dog-app .button{
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    background-color: white;
+    width: 150px;
+    height: 70px;
+    border-radius: 10px;
+}
+#dog-app .button_changeDog{
+    width: 190px;
+    height: 70px;
+}
+
+#dog-app .input{
+    font-size: 40px;
+    font-weight: 500;
+    text-align: center;
+    width: 320px;
+    height: 70px;
+    border: solid 3px brown;
+    border-radius: 1px;
+}
+
+#dog-app .dog_img{
+    max-width: 90%;
+    max-height: 90%;
+}
+
+#dog-app .hide{
+    display: none !important;
+}
+
+
+#dog-app #Page2{
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    position: relative;
+    left: auto;
+    transform: none;
+    font-family: "Tsukushi A Old Mincho", "筑紫Aオールド明朝", "BIZ UDMincho", "BIZ UD明朝", "HGP行書体", "HG正楷書体-PRO", serif;
+    font-size: 100px;
+    font-weight: 400;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    display: inline-block;
+    margin-top: 50px;
+}
+
+#dog-app .line1, #dog-app .line2, #dog-app .line3 {
+    opacity: 0;
+    animation: fade-in 3.0s ease-in forwards;
+}
+
+#dog-app .line1{
+    font-family: "Hiragino Kaku Gothic Interface W8", "Hiragino Sans W8", "HGS行書体", "HG行書体", "Biz highmincho", "MS Mincho", serif;
+    font-size: 100px;
+    margin-right: 300px;
+    animation-delay: 0.5s;
+}
+
+#dog-app .line2{
+    margin-left: 100px;
+    margin-right: 100px;
+    margin-top: 100px;
+    font-size: 130px;
+    font-weight: 900;
+    animation-delay: 3.0s;
+}
+
+#dog-app .line3{
+    margin-top: 400px;
+    width: 500px;
+    height: auto;
+    min-height: 300px;
+    animation-delay: 3.0s;
+}
+
+#dog-app .line_3_pic{
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 600px) {
+ #dog-app .input { width: min(55vw, 320px); font-size: 24px; }
+ #dog-app .button { width: auto; min-width: 110px; height: auto; min-height: 58px; font-size: 16px; }
+ #dog-app .button_changeDog { min-width: 170px; }
+ #dog-app #Page2 { font-size: 48px; }
+ #dog-app .line1 { font-size: 48px; margin-right: 80px; }
+ #dog-app .line2 { font-size: 64px; margin: 35px; }
+ #dog-app .line3 { margin-top: 100px; width: min(80vw, 500px); }
+}
