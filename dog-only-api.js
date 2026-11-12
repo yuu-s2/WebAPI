@@ -1,8 +1,16 @@
 if (sessionStorage.getItem("returnToDog") === "1") {
     sessionStorage.removeItem("returnToDog");
 
+    // ブラウザが勝手に元の深い位置へスクロールするのを防ぐ
+    if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+    }
+
     window.addEventListener("load", () => {
-        document.getElementById("dog-app").scrollIntoView();
+        // 画面の高さが確定した直後に犬のアプリ位置へ移動
+        setTimeout(() => {
+            document.getElementById("dog-app").scrollIntoView({ behavior: "instant" });
+        }, 50);
     });
 }
 
@@ -36,7 +44,7 @@ function putName(){
         setTimeout(() => {
         sessionStorage.setItem("returnToDog", "1");
         location.reload();
-}, 8000);
+}, 10000);
     }, 2000);
     
 }
